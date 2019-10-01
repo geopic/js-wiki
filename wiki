@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+const rq = require('request-promise-native');
+
+// Early return if invalid arguments passed to script
+if (process.argv.length !== 3) {
+  console.error('Too few or too many arguments supplied.');
+  return;
+}
+
+rq(
+  `https://en.wikipedia.org/w/api.php?action=parse&format=json&redirects=1&page=${
+    process.argv[2]
+  }`
+)
+  .then(res => {
+    const json = JSON.parse(res).parse;
+    console.log(json.title);
+    console.log(json.text);
+  })
+  .catch(err => console.error('Error\n', err));
