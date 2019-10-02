@@ -8,13 +8,17 @@ if (process.argv.length !== 3) {
 }
 
 rq(
-  `https://en.wikipedia.org/w/api.php?action=parse&format=json&redirects=1&page=${
-    process.argv[2]
-  }`
+  `https://en.wikipedia.org/w/api.php?action=parse&format=json&redirects=1&page=${process.argv[2].toLowerCase()}`
 )
   .then(res => {
     const json = JSON.parse(res).parse;
-    console.log(json.title);
-    console.log(json.text);
+    const text = json.text['*'].replace(/<[^>]*>?/gm, '').trim(); // Clear HTML tags and spaces from content
+    console.log(text.slice(text.indexOf(json.title), text.length)); // Log first occurrence of term (summary) to console
   })
-  .catch(err => console.error('Error\n', err));
+  .catch(err => {
+    if (err.name === 'TypeError') {
+      console.error('No page exists with that name.');
+      return;
+    }
+    console.error('Error:\n', err);
+  });
